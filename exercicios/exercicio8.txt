@@ -1,0 +1,24 @@
+8. Funcionários com Salários Abaixo da Média nas Melhores Regiões
+Enunciado: Listar os funcionários com salários abaixo da média por departamento nas regiões com os maiores salários.
+
+
+WITH departamento_salarios AS (
+    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+), top_departamentos AS (
+    SELECT sigla
+    FROM departamento_salarios
+    ORDER BY total_salarios DESC
+    LIMIT 10
+), media_salarios_por_departamento AS (
+    SELECT d.sigla, AVG(f.salario) AS media_salario
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+)
+SELECT f.nome, f.salario, f.codDepto
+FROM funcionario f
+JOIN media_salarios_por_departamento m ON f.codDepto = m.codDepto
+WHERE f.salario < m.media_salario AND f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));

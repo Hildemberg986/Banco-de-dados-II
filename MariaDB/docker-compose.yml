@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.5
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: db
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - minha_rede
+
+  adminer:
+    image: adminer
+    container_name: meu_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - minha_rede
+
+volumes:
+  mariadb_data:
+    driver: local
+
+networks:
+  minha_rede:
+    driver: bridge

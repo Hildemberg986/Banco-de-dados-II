@@ -1,0 +1,35 @@
+10. Departamentos com Maior Crescimento de Atividades, Excluindo Projetos Iniciados no Último Ano
+Enunciado: Crie uma consulta que mostre os departamentos com maior crescimento em atividades, mas exclua os projetos que foram iniciados no último ano de dados disponíveis.
+
+
+WITH department_activity_growth AS (
+    SELECT p.codDepto,
+           EXTRACT(YEAR FROM a.dataInicio) AS year,
+           COUNT(a.codigo) AS total_activities
+    FROM atividade a
+    JOIN projeto p ON a.codProjeto = p.codigo
+    GROUP BY p.codDepto, EXTRACT(YEAR FROM a.dataInicio)
+), activity_growth_percentage AS (
+    SELECT a.codDepto,
+           a.total_activities AS current_year_activities,
+           COALESCE(b.total_activities, 0) AS previous_year_activities,
+           CASE 
+               WHEN b.total_activities > 0 THEN
+                   ((a.total_activities - b.total_activities) / b.total_activities) * 100
+               ELSE 0
+           END AS growth_percentage
+    FROM department_activity_growth a
+    LEFT JOIN department_activity_growth b 
+        ON a.codDepto = b.codDepto AND a.year = b.year + 1
+), top_departments AS (
+    SELECT codDepto
+    FROM activity_growth_percentage
+    ORDER BY growth_percentage DESC
+    LIMIT 10
+)
+SELECT d.sigla AS department, p.nome AS project_name, COUNT(a.codigo) AS total_activities
+FROM atividade a
+JOIN projeto p ON a.codProjeto = p.codigo
+JOIN departamento d ON p.codDepto = d.codigo
+WHERE p.codDepto IN (SELECT codDepto FROM top_departments)
+GROUP BY d.sigla, p.nome;

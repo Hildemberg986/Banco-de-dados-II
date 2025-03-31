@@ -1,0 +1,11 @@
+1. Consulta Básica com WITH: Total de vendas por departamento
+Enunciado: Mostrar o total de salários por departamento.
+
+
+WITH departamento_salarios AS (
+    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+)
+SELECT sigla, total_salarios FROM departamento_salarios;

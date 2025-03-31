@@ -1,0 +1,13 @@
+2. Seleção de Departamentos com Salários Acima da Média
+Enunciado: Encontrar os departamentos com salários totais superiores à média de todos os departamentos.
+
+
+WITH departamento_salarios AS (
+    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+)
+SELECT sigla, total_salarios
+FROM departamento_salarios
+WHERE total_salarios > (SELECT AVG(total_salarios) FROM departamento_salarios);

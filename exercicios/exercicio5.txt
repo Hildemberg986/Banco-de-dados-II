@@ -1,0 +1,17 @@
+5. Comparando Salários de Departamentos em Anos Diferentes
+Enunciado: Calcular a diferença de salários totais por departamento entre dois anos consecutivos.
+
+
+WITH salarios_por_ano AS (
+    SELECT d.sigla, EXTRACT(YEAR FROM f.dtNasc) AS ano, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla, EXTRACT(YEAR FROM f.dtNasc)
+), diferenca_salarios AS (
+    SELECT a.sigla, a.total_salarios AS salario_ano_atual, b.total_salarios AS salario_ano_anterior,
+           (a.total_salarios - b.total_salarios) AS diferenca_salarios
+    FROM salarios_por_ano a
+    JOIN salarios_por_ano b ON a.sigla = b.sigla AND a.ano = b.ano + 1
+)
+SELECT sigla, salario_ano_atual, salario_ano_anterior, diferenca_salarios
+FROM diferenca_salarios;

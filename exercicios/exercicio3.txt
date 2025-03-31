@@ -1,0 +1,18 @@
+3. Identificando os 10 Departamentos com Maiores Salários
+Enunciado: Encontrar os 10 departamentos com as maiores somas de salários.
+
+
+WITH departamento_salarios AS (
+    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+), top_departamentos AS (
+    SELECT sigla
+    FROM departamento_salarios
+    ORDER BY total_salarios DESC
+    LIMIT 10
+)
+SELECT d.sigla, ds.total_salarios 
+FROM departamento_salarios ds
+JOIN top_departamentos td ON ds.sigla = td.sigla;

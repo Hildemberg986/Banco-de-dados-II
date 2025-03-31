@@ -1,0 +1,18 @@
+7. Calculando a Média de Salários por Departamento nas Melhores Regiões
+Enunciado: Calcular a média de salários por departamento nos departamentos com os maiores salários totais.
+
+
+WITH departamento_salarios AS (
+    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla
+), top_departamentos AS (
+    SELECT sigla
+    FROM departamento_salarios
+    ORDER BY total_salarios DESC
+    LIMIT 10
+)
+SELECT f.nome, f.salario, f.codDepto
+FROM funcionario f
+WHERE f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));

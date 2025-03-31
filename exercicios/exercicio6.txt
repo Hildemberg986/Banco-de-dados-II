@@ -1,0 +1,18 @@
+6. Identificando os Departamentos com Crescimento Acima de 20%
+Enunciado: Identificar os departamentos com um crescimento superior a 20% nos salários totais.
+
+
+WITH salarios_por_ano AS (
+    SELECT d.sigla, EXTRACT(YEAR FROM f.dtNasc) AS ano, SUM(f.salario) AS total_salarios
+    FROM funcionario f
+    JOIN departamento d ON f.codDepto = d.codigo
+    GROUP BY d.sigla, EXTRACT(YEAR FROM f.dtNasc)
+), crescimento_salarios AS (
+    SELECT a.sigla, a.total_salarios AS salario_ano_atual, b.total_salarios AS salario_ano_anterior,
+           ((a.total_salarios - b.total_salarios) / b.total_salarios) * 100 AS crescimento_percentual
+    FROM salarios_por_ano a
+    JOIN salarios_por_ano b ON a.sigla = b.sigla AND a.ano = b.ano + 1
+)
+SELECT sigla, salario_ano_atual, salario_ano_anterior, crescimento_percentual
+FROM crescimento_salarios
+WHERE crescimento_percentual > 20;
