@@ -1,11 +1,38 @@
-1. Consulta Básica com WITH: Total de vendas por departamento
-Enunciado: Mostrar o total de salários por departamento.
+1. Na Universidade Federal do Rio Grande do Norte (UFRN), o Departamento de Ciências e Tecnologia (DCT) é a casa do curso de Bacharelado em Sistemas de Informação. Como parte de um estudo sobre a distribuição orçamentária da instituição, a administração precisa entender melhor como os salários dos funcionários são distribuídos entre os departamentos.
+
+Você foi designado para ajudar na análise e precisa criar uma consulta SQL utilizando WITH para calcular o total de salários pagos por departamento.
 
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-)
-SELECT sigla, total_salarios FROM departamento_salarios;
+
+**Query #1**
+
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    )
+    SELECT sigla, total_salarios FROM departamento_salarios;
+
+
+| sigla | total_salarios |
+| ----- | -------------- |
+| DCT   | 13500.00       |
+| DED   | 2450.00        |
+| DFTE  | 2500.00        |
+| DDS   | 3400.00        |
+| DHC   | 14100.00       |
+| DEN   | 2900.00        |
+| DAD   | 3800.00        |
+| DBI   | 4500.00        |
+| DGC   | 8600.00        |
+| DQU   | 2950.00        |
+| DLE   | 2350.00        |
+| DAR   | 4100.00        |
+| DSS   | 5000.00        |
+| DMA   | 2700.00        |
+| DFI   | 2750.00        |
+| DXT   | 2200.00        |
+| DPS   | 3600.00        |
+| DEC   | 2600.00        |
+| DCC   | 3300.00        |

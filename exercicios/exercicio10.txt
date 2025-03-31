@@ -1,35 +1,50 @@
-10. Departamentos com Maior Crescimento de Atividades, Excluindo Projetos Iniciados no Último Ano
-Enunciado: Crie uma consulta que mostre os departamentos com maior crescimento em atividades, mas exclua os projetos que foram iniciados no último ano de dados disponíveis.
+10. A Universidade Federal do Rio Grande do Norte (UFRN) está monitorando o desempenho de seus departamentos em relação às atividades de pesquisa e desenvolvimento de projetos ao longo dos anos. No entanto, a administração deseja focar na evolução dos departamentos, considerando apenas o crescimento contínuo e evitando a influência de projetos iniciados recentemente, que possam distorcer a análise.
 
+**Query #1**
 
-WITH department_activity_growth AS (
-    SELECT p.codDepto,
-           EXTRACT(YEAR FROM a.dataInicio) AS year,
-           COUNT(a.codigo) AS total_activities
+    WITH department_activity_growth AS (
+        SELECT p.codDepto,
+               EXTRACT(YEAR FROM a.dataInicio) AS year,
+               COUNT(a.codigo) AS total_activities
+        FROM atividade a
+        JOIN projeto p ON a.codProjeto = p.codigo
+        GROUP BY p.codDepto, EXTRACT(YEAR FROM a.dataInicio)
+    ), activity_growth_percentage AS (
+        SELECT a.codDepto,
+               a.total_activities AS current_year_activities,
+               COALESCE(b.total_activities, 0) AS previous_year_activities,
+               CASE 
+                   WHEN b.total_activities > 0 THEN
+                       ((a.total_activities - b.total_activities) / b.total_activities) * 100
+                   ELSE 0
+               END AS growth_percentage
+        FROM department_activity_growth a
+        LEFT JOIN department_activity_growth b 
+            ON a.codDepto = b.codDepto AND a.year = b.year + 1
+    ), top_departments AS (
+        SELECT codDepto
+        FROM activity_growth_percentage
+        ORDER BY growth_percentage DESC
+        LIMIT 10
+    )
+    SELECT d.sigla AS department, p.nome AS project_name, COUNT(a.codigo) AS total_activities
     FROM atividade a
     JOIN projeto p ON a.codProjeto = p.codigo
-    GROUP BY p.codDepto, EXTRACT(YEAR FROM a.dataInicio)
-), activity_growth_percentage AS (
-    SELECT a.codDepto,
-           a.total_activities AS current_year_activities,
-           COALESCE(b.total_activities, 0) AS previous_year_activities,
-           CASE 
-               WHEN b.total_activities > 0 THEN
-                   ((a.total_activities - b.total_activities) / b.total_activities) * 100
-               ELSE 0
-           END AS growth_percentage
-    FROM department_activity_growth a
-    LEFT JOIN department_activity_growth b 
-        ON a.codDepto = b.codDepto AND a.year = b.year + 1
-), top_departments AS (
-    SELECT codDepto
-    FROM activity_growth_percentage
-    ORDER BY growth_percentage DESC
-    LIMIT 10
-)
-SELECT d.sigla AS department, p.nome AS project_name, COUNT(a.codigo) AS total_activities
-FROM atividade a
-JOIN projeto p ON a.codProjeto = p.codigo
-JOIN departamento d ON p.codDepto = d.codigo
-WHERE p.codDepto IN (SELECT codDepto FROM top_departments)
-GROUP BY d.sigla, p.nome;
+    JOIN departamento d ON p.codDepto = d.codigo
+    WHERE p.codDepto IN (SELECT codDepto FROM top_departments)
+    GROUP BY d.sigla, p.nome;
+
+| departmento | nome_projeto       | total_atividades |
+| ----------- | ------------------ | ---------------- |
+| DBI         | Biologia Molecular | 3                |
+| DCT         | APF                | 3                |
+| DCT         | Cloud              | 3                |
+| DCT         | IA                 | 3                |
+| DCT         | IoT                | 3                |
+| DCT         | Redes              | 3                |
+| DGC         | BD                 | 2                |
+| DGC         | Geografia Urbana   | 3                |
+| DHC         | ES                 | 1                |
+| DHC         | História Digital   | 3                |
+| DHC         | Monitoria          | 1                |
+| DMA         | Matemática Aplicada| 3                |

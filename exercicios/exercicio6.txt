@@ -1,18 +1,27 @@
-6. Identificando os Departamentos com Crescimento Acima de 20%
-Enunciado: Identificar os departamentos com um crescimento superior a 20% nos salários totais.
+6. A administração da UFRN deseja identificar quais departamentos possuem uma folha salarial total significativamente maior do que a média geral dos departamentos. Para isso, é necessário encontrar os departamentos onde a soma total dos salários pagos atualmente aos funcionários é pelo menos 20% maior que a média geral.
 
+**Query #1**
 
-WITH salarios_por_ano AS (
-    SELECT d.sigla, EXTRACT(YEAR FROM f.dtNasc) AS ano, SUM(f.salario) AS total_salarios
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla, EXTRACT(YEAR FROM f.dtNasc)
-), crescimento_salarios AS (
-    SELECT a.sigla, a.total_salarios AS salario_ano_atual, b.total_salarios AS salario_ano_anterior,
-           ((a.total_salarios - b.total_salarios) / b.total_salarios) * 100 AS crescimento_percentual
-    FROM salarios_por_ano a
-    JOIN salarios_por_ano b ON a.sigla = b.sigla AND a.ano = b.ano + 1
-)
-SELECT sigla, salario_ano_atual, salario_ano_anterior, crescimento_percentual
-FROM crescimento_salarios
-WHERE crescimento_percentual > 20;
+    WITH total_salarios_depto AS
+    (SELECT d.sigla AS departamento,
+            SUM(f.salario) AS salario_total
+    FROM departamento d
+    LEFT JOIN funcionario f ON d.codigo = f.codDepto
+    GROUP BY d.sigla),
+        media_salarios AS
+    (SELECT ROUND(AVG(salario_total), 2) AS media_geral
+    FROM total_salarios_depto)
+    SELECT t.departamento,
+        t.salario_total,
+        m.media_geral,
+        ROUND((t.salario_total - m.media_geral) / m.media_geral * 100, 2) AS percentual_acima_media
+    FROM total_salarios_depto t
+    CROSS JOIN media_salarios m
+    WHERE (t.salario_total - m.media_geral) / m.media_geral * 100 > 20
+    ORDER BY percentual_acima_media DESC;
+
+| departamento | salario_total | media_geral | percentual_acima_media |
+| ------------ | ------------- | ----------- | ---------------------- |
+| DHC          | 14100.00      | 4594.74     | 206.87                 |
+| DCT          | 13500.00      | 4594.74     | 193.81                 |
+| DGC          | 8600.00       | 4594.74     | 87.17                  |

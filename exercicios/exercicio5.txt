@@ -1,17 +1,25 @@
-5. Comparando Salários de Departamentos em Anos Diferentes
-Enunciado: Calcular a diferença de salários totais por departamento entre dois anos consecutivos.
+5.Na UFRN, a administração deseja acompanhar a evolução salarial dos departamentos ao longo dos anos. Para isso, é necessário calcular a diferença de salários totais por departamento entre dois anos consecutivos. Essa análise ajudará a identificar variações nos investimentos salariais ao longo do tempo.
+
+Seu objetivo é construir uma consulta SQL que calcule essa diferença de salários entre dois anos consecutivos para cada departamento. A consulta deve comparar os salários totais de cada departamento de um ano com o ano seguinte.
 
 
-WITH salarios_por_ano AS (
-    SELECT d.sigla, EXTRACT(YEAR FROM f.dtNasc) AS ano, SUM(f.salario) AS total_salarios
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla, EXTRACT(YEAR FROM f.dtNasc)
-), diferenca_salarios AS (
-    SELECT a.sigla, a.total_salarios AS salario_ano_atual, b.total_salarios AS salario_ano_anterior,
-           (a.total_salarios - b.total_salarios) AS diferenca_salarios
-    FROM salarios_por_ano a
-    JOIN salarios_por_ano b ON a.sigla = b.sigla AND a.ano = b.ano + 1
-)
-SELECT sigla, salario_ano_atual, salario_ano_anterior, diferenca_salarios
-FROM diferenca_salarios;
+**Query #1**
+
+    WITH salarios_por_ano AS (
+        SELECT d.sigla, EXTRACT(YEAR FROM f.dtNasc) AS ano, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla, EXTRACT(YEAR FROM f.dtNasc)
+    ), diferenca_salarios AS (
+        SELECT a.sigla, a.total_salarios AS salario_ano_atual, b.total_salarios AS salario_ano_anterior,
+               (a.total_salarios - b.total_salarios) AS diferenca_salarios
+        FROM salarios_por_ano a
+        JOIN salarios_por_ano b ON a.sigla = b.sigla AND a.ano = b.ano + 1
+    )
+    SELECT sigla, salario_ano_atual, salario_ano_anterior, diferenca_salarios
+    FROM diferenca_salarios;
+
+| sigla | salario_ano_atual | salario_ano_anterior | diferenca_salarios |
+| ----- | ----------------- | -------------------- | ------------------ |
+| DCT   | 2500.00           | 3500.00              | -1000.00           |
+| DHC   | 2500.00           | 2500.00              | 0.00               |

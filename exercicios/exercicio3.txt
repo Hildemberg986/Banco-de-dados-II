@@ -1,18 +1,36 @@
-3. Identificando os 10 Departamentos com Maiores Salários
-Enunciado: Encontrar os 10 departamentos com as maiores somas de salários.
+3. Na UFRN, a administração deseja identificar os 10 departamentos com as maiores somas de salários, para compreender melhor onde estão concentrados os maiores investimentos em recursos humanos. Seu objetivo é construir uma consulta SQL que encontre e exiba os 10 departamentos com o maior total de salários pagos aos seus funcionários.
+
+Como você já utilizou uma consulta com WITH para calcular o total de salários por departamento, agora, aproveite essa estrutura já existente para encontrar e listar os 10 departamentos com os maiores totais salariais.
 
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-), top_departamentos AS (
-    SELECT sigla
-    FROM departamento_salarios
-    ORDER BY total_salarios DESC
-    LIMIT 10
-)
-SELECT d.sigla, ds.total_salarios 
-FROM departamento_salarios ds
-JOIN top_departamentos td ON ds.sigla = td.sigla;
+
+**Query #1**
+
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    ), top_departamentos AS (
+        SELECT sigla
+        FROM departamento_salarios
+        ORDER BY total_salarios DESC
+        LIMIT 10
+    )
+    SELECT ds.sigla, ds.total_salarios 
+    FROM departamento_salarios ds
+    JOIN top_departamentos td ON ds.sigla = td.sigla
+    ORDER BY ds.total_salarios DESC;
+
+| sigla | total_salarios |
+| ----- | -------------- |
+| DHC   | 14100.00       |
+| DCT   | 13500.00       |
+| DGC   | 8600.00        |
+| DSS   | 5000.00        |
+| DBI   | 4500.00        |
+| DAR   | 4100.00        |
+| DAD   | 3800.00        |
+| DPS   | 3600.00        |
+| DDS   | 3400.00        |
+| DCC   | 3300.00        |

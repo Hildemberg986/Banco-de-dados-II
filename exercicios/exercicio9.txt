@@ -1,29 +1,40 @@
-9. Departamentos com Maior Crescimento em Projetos e suas Atividades Associadas
-Enunciado: Crie uma consulta que identifique os departamentos com maior crescimento percentual em projetos entre dois anos consecutivos e mostre o nome do departamento, o nome do projeto e o total de atividades associadas a esses projetos.
+9. A Universidade Federal do Rio Grande do Norte (UFRN) está constantemente buscando aprimorar suas atividades acadêmicas e de pesquisa, com o objetivo de oferecer mais oportunidades de desenvolvimento para seus departamentos. Como parte de uma avaliação de desempenho, a administração deseja identificar quais departamentos tiveram o maior crescimento no número de projetos entre dois anos consecutivos, permitindo analisar quais áreas estão mais ativas em termos de pesquisa e inovação.
 
+**Query #1**
 
-WITH department_growth AS (
-    SELECT p.codDepto,
-           EXTRACT(YEAR FROM p.dataInicio) AS year,
-           COUNT(p.codigo) AS total_projects
-    FROM projeto p
-    GROUP BY p.codDepto, EXTRACT(YEAR FROM p.dataInicio)
-), growth_percentage AS (
-    SELECT a.codDepto,
-           a.total_projects AS current_year_projects,
-           b.total_projects AS previous_year_projects,
-           ((a.total_projects - b.total_projects) / b.total_projects) * 100 AS growth_percentage
-    FROM department_growth a
-    JOIN department_growth b ON a.codDepto = b.codDepto AND a.year = b.year + 1
-), top_departments AS (
-    SELECT codDepto
-    FROM growth_percentage
-    ORDER BY growth_percentage DESC
-    LIMIT 10
-)
-SELECT d.sigla AS department, p.nome AS project_name, COUNT(a.codigo) AS total_activities
-FROM atividade a
-JOIN projeto p ON a.codProjeto = p.codigo
-JOIN departamento d ON p.codDepto = d.codigo
-WHERE p.codDepto IN (SELECT codDepto FROM top_departments)
-GROUP BY d.sigla, p.nome;
+    WITH department_growth AS (
+        SELECT p.codDepto,
+               EXTRACT(YEAR FROM p.dataInicio) AS year,
+               COUNT(p.codigo) AS total_projects
+        FROM projeto p
+        GROUP BY p.codDepto, EXTRACT(YEAR FROM p.dataInicio)
+    ), growth_percentage AS (
+        SELECT a.codDepto,
+               a.total_projects AS current_year_projects,
+               b.total_projects AS previous_year_projects,
+               ((a.total_projects - b.total_projects) / b.total_projects) * 100 AS growth_percentage
+        FROM department_growth a
+        JOIN department_growth b ON a.codDepto = b.codDepto AND a.year = b.year + 1
+    ), top_departments AS (
+        SELECT codDepto
+        FROM growth_percentage
+        ORDER BY growth_percentage DESC
+        LIMIT 10
+    )
+    SELECT d.sigla AS department, p.nome AS project_name, COUNT(a.codigo) AS total_activities
+    FROM atividade a
+    JOIN projeto p ON a.codProjeto = p.codigo
+    JOIN departamento d ON p.codDepto = d.codigo
+    WHERE p.codDepto IN (SELECT codDepto FROM top_departments)
+    GROUP BY d.sigla, p.nome;
+
+| departamento | nome_projeto     | total_atividades |
+| ------------ | ---------------- | ---------------- |
+| DCT          | APF              | 3                |
+| DCT          | Cloud            | 3                |
+| DCT          | IA               | 3                |
+| DCT          | IoT              | 3                |
+| DCT          | Redes            | 3                |
+| DHC          | ES               | 1                |
+| DHC          | História Digital | 3                |
+| DHC          | Monitoria        | 1                |

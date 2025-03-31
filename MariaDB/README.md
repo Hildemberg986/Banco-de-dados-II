@@ -43,5 +43,5 @@ admin
 ```
 ### Base de dados
 ```bash 
-db
+dbmaria
 ```

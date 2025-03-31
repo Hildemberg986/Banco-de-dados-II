@@ -1,24 +1,35 @@
-8. Funcionários com Salários Abaixo da Média nas Melhores Regiões
-Enunciado: Listar os funcionários com salários abaixo da média por departamento nas regiões com os maiores salários.
+8. A UFRN tem investido significativamente em alguns departamentos com maiores orçamentos e, consequentemente, maiores salários para seus funcionários. No entanto, a administração quer verificar se existe desigualdade salarial dentro desses departamentos, ou seja, se há funcionários com salários abaixo da média dentro dos departamentos com as maiores folhas salariais.
 
+**Query #1**
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    ), top_departamentos AS (
+        SELECT sigla
+        FROM departamento_salarios
+        ORDER BY total_salarios DESC
+        LIMIT 10
+    ), media_salarios_por_departamento AS (
+        SELECT d.sigla, AVG(f.salario) AS media_salario
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    )
+    SELECT f.nome, f.salario, d.sigla AS sigla_departamento
     FROM funcionario f
     JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-), top_departamentos AS (
-    SELECT sigla
-    FROM departamento_salarios
-    ORDER BY total_salarios DESC
-    LIMIT 10
-), media_salarios_por_departamento AS (
-    SELECT d.sigla, AVG(f.salario) AS media_salario
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-)
-SELECT f.nome, f.salario, f.codDepto
-FROM funcionario f
-JOIN media_salarios_por_departamento m ON f.codDepto = m.codDepto
-WHERE f.salario < m.media_salario AND f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));
+    JOIN media_salarios_por_departamento m ON d.sigla = m.sigla
+    WHERE f.salario < m.media_salario
+      AND d.sigla IN (SELECT sigla FROM top_departamentos)
+    ORDER BY d.sigla, f.salario;
+
+| nome      | salario | sigla_departamento |
+| --------- | ------- | ------------------ |
+| Humberto  | 1500.00 | DCT                |
+| Taciano   | 2500.00 | DCT                |
+| Doisberto | 2500.00 | DGC                |
+| Victor    | 500.00  | DHC                |
+| Sasha     | 1500.00 | DHC                |

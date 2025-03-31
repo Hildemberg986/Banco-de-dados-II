@@ -46,5 +46,5 @@ admin
 ```
 ### Base de dados
 ```bash 
-db
+dbpostgress
 ```

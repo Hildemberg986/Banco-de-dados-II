@@ -1,18 +1,45 @@
-7. Calculando a Média de Salários por Departamento nas Melhores Regiões
-Enunciado: Calcular a média de salários por departamento nos departamentos com os maiores salários totais.
+7. A UFRN está em um processo de análise e otimização de sua distribuição orçamentária, especialmente no que diz respeito aos salários pagos aos seus funcionários. Alguns departamentos têm um orçamento maior e, consequentemente, somas de salários mais altas.
 
+Com isso em mente, a administração deseja identificar e entender como os salários estão distribuídos nos departamentos mais bem financiados. Para isso, você deve criar uma consulta SQL que:
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
+| nome      **Query #1**
+
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    ), top_departamentos AS (
+        SELECT sigla
+        FROM departamento_salarios
+        ORDER BY total_salarios DESC
+        LIMIT 10
+    )
+    SELECT f.nome, f.salario, f.codDepto
     FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-), top_departamentos AS (
-    SELECT sigla
-    FROM departamento_salarios
-    ORDER BY total_salarios DESC
-    LIMIT 10
-)
-SELECT f.nome, f.salario, f.codDepto
-FROM funcionario f
-WHERE f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));
+    WHERE f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));
+
+| nome      | salario | coddepto |
+| --------- | ------- | -------- |
+| Ana       | 2500.00 | 1        |
+| Taciano   | 2500.00 | 2        |
+| Maria     | 2500.00 | 1        |
+| Josefa    | 2500.00 | 1        |
+| Carlos    | 2500.00 | 1        |
+| Humberto  | 1500.00 | 2        |
+| José      | 3500.00 | 2        |
+| Sasha     | 1500.00 | 1        |
+| Victor    | 500.00  | 1        |
+| Doisberto | 2500.00 | 3        |
+| Ricardo   | 3200.00 | 2        |
+| Fernanda  | 2800.00 | 2        |
+| Patrícia  | 3100.00 | 3        |
+| Elaine    | 4500.00 | 8        |
+| Gustavo   | 3800.00 | 9        |
+| Marcelo   | 3300.00 | 11       |
+| Otávio    | 4100.00 | 13       |
+| Tatiane   | 3600.00 | 16       |
+| Henrique  | 3400.00 | 17       |
+| Roberto   | 5000.00 | 19       |
+| Viviane   | 2100.00 | 1        |
+| Tresberta | 3000.00 | 3        |

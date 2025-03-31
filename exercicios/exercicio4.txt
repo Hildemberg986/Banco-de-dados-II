@@ -1,18 +1,48 @@
-4. Consultando os Funcionários Mais Bem Pagos nos Melhores Departamentos
-Enunciado: Mostrar os funcionários com os maiores salários nos departamentos com maior soma de salários.
+4. Na UFRN, a administração deseja identificar quais funcionários recebem os maiores salários nos departamentos que têm a maior soma de salários. A consulta deve mostrar os funcionários que estão nos 10 departamentos com maiores salários, com foco em encontrar os mais bem pagos dentro dessas áreas.
 
+Você já possui uma consulta que calcula os departamentos com os maiores totais salariais. Agora, você precisa modificar a consulta para mostrar apenas os funcionários com os maiores salários dentro dos departamentos com as maiores somas de salários.
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
+**Query #1**
+
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    ), top_departamentos AS (
+        SELECT sigla
+        FROM departamento_salarios
+        ORDER BY total_salarios DESC
+        LIMIT 10
+    )
+    SELECT f.nome, f.salario, d.sigla AS sigla_departamento
     FROM funcionario f
     JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-), top_departamentos AS (
-    SELECT sigla
-    FROM departamento_salarios
-    ORDER BY total_salarios DESC
-    LIMIT 10
-)
-SELECT f.nome, f.salario, f.codDepto
-FROM funcionario f
-WHERE f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));
+    WHERE f.codDepto IN (SELECT codigo FROM departamento WHERE sigla IN (SELECT sigla FROM top_departamentos));
+
+| nome      | salario | sigla_departamento |
+| --------- | ------- | ------------------ |
+| Ana       | 2500.00 | DHC                |
+| Taciano   | 2500.00 | DCT                |
+| Maria     | 2500.00 | DHC                |
+| Josefa    | 2500.00 | DHC                |
+| Carlos    | 2500.00 | DHC                |
+| Humberto  | 1500.00 | DCT                |
+| José      | 3500.00 | DCT                |
+| Sasha     | 1500.00 | DHC                |
+| Victor    | 500.00  | DHC                |
+| Doisberto | 2500.00 | DGC                |
+| Ricardo   | 3200.00 | DCT                |
+| Fernanda  | 2800.00 | DCT                |
+| Patrícia  | 3100.00 | DGC                |
+| Elaine    | 4500.00 | DBI                |
+| Gustavo   | 3800.00 | DAD                |
+| Marcelo   | 3300.00 | DCC                |
+| Otávio    | 4100.00 | DAR                |
+| Tatiane   | 3600.00 | DPS                |
+| Henrique  | 3400.00 | DDS                |
+| Roberto   | 5000.00 | DSS                |
+| Viviane   | 2100.00 | DHC                |
+| Tresberta | 3000.00 | DGC                |
+
+---

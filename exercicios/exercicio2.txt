@@ -1,13 +1,23 @@
-2. Seleção de Departamentos com Salários Acima da Média
-Enunciado: Encontrar os departamentos com salários totais superiores à média de todos os departamentos.
+2. Na UFRN, a administração deseja entender melhor a distribuição dos recursos salariais entre os departamentos. Alguns setores recebem uma fatia maior do orçamento, e é necessário identificar quais deles possuem uma folha salarial total acima da média da universidade.
+
+Você já construiu uma consulta utilizando WITH para calcular o total de salários por departamento. Agora, reaproveite essa estrutura para encontrar apenas os departamentos cujo total de salários pagos seja superior à média de todos os departamentos.
 
 
-WITH departamento_salarios AS (
-    SELECT d.sigla, SUM(f.salario) AS total_salarios
-    FROM funcionario f
-    JOIN departamento d ON f.codDepto = d.codigo
-    GROUP BY d.sigla
-)
-SELECT sigla, total_salarios
-FROM departamento_salarios
-WHERE total_salarios > (SELECT AVG(total_salarios) FROM departamento_salarios);
+**Query #1**
+
+    WITH departamento_salarios AS (
+        SELECT d.sigla, SUM(f.salario) AS total_salarios
+        FROM funcionario f
+        JOIN departamento d ON f.codDepto = d.codigo
+        GROUP BY d.sigla
+    )
+    SELECT sigla, total_salarios
+    FROM departamento_salarios
+    WHERE total_salarios > (SELECT AVG(total_salarios) FROM departamento_salarios);
+
+| sigla | total_salarios |
+| ----- | -------------- |
+| DCT   | 13500.00       |
+| DHC   | 14100.00       |
+| DGC   | 8600.00        |
+| DSS   | 5000.00        |
